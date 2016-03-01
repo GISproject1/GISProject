@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Simple Map</title>
+    <link rel="stylesheet" type="text/css" href="http://10.60.38.154:8080/arcgis_js_api/library/3.13/3.13/dijit/themes/tundra/tundra.css"/>
+    <link rel="stylesheet" type="text/css" href="http://10.60.38.154:8080/arcgis_js_api/library/3.13/3.13/esri/css/esri.css" />
+	<style>
+    html, body, #mapDiv{
+      padding: 0;
+      margin: 0;
+      height: 100%;
+    }
+  </style>
+    <script type="text/javascript" src="http://10.60.38.154:8080/arcgis_js_api/library/3.13/3.13/init.js"></script>
+
+    <script type="text/javascript">
+		require(["esri/map", "dojo/domReady!"], function(Map) { 
+		  var map = new Map("mapDiv", {
+			basemap: "http://localhost:6080/arcgis/rest/services/SampleWorldCities/MapServer"
+		  });
+		});
+    </script>
+  </head>
+  <body class="tundra">
+    <div id="mapDiv"></div>
+  </body>
+</html>
