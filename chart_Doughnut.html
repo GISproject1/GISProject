@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Query State Info without Map</title>
+
+    <script src="https://js.arcgis.com/3.15/"></script>
+    <script src="http://cdn.bootcss.com/Chart.js/1.0.2/Chart.js"></script>
+    
+  </head>
+
+  <body>
+    US state name :
+    <input type="text" id="stateName" value="Tokyo">
+    <input id="execute" type="button" value="Get Details">
+    <br />
+    <br />
+    <div id="info" style="padding:5px; margin:5px; background-color:#eee;">
+    </div>
+    <canvas id="myChart" width="400" height="400"></canvas>
+    
+    <script>
+      require([
+        "dojo/dom", "dojo/on",
+        "esri/tasks/query", "esri/tasks/QueryTask", "dojo/domReady!"
+      ], function (dom, on, Query, QueryTask) {
+
+        var queryTask = new QueryTask("http://10.60.38.154:6080/arcgis/rest/services/SampleWorldCities/MapServer/0");
+
+        var query = new Query();
+        query.returnGeometry = false;
+        query.outFields = [
+          "Shape", "CITY_NAME", "POP", "POP_RANK", "POP_CLASS",
+          "LABEL_FLAG"
+        ];
+
+        on(dom.byId("execute"), "click", execute);
+
+        function execute () {
+          //query.text = dom.byId("stateName").value;
+          query.where = "CITY_NAME ='Beijing' or CITY_NAME ='Shanghai' or CITY_NAME ='Tokyo'";
+          queryTask.execute(query, showResults);
+        }
+
+        var data = [];
+        function showResults (results) {
+          //alert(JSON.stringify(results));
+          var resultItems = [];
+          
+          var resultCount = results.features.length;
+          //alert(resultCount);
+          for (var i = 0; i < resultCount; i++) {
+            var featureAttributes = results.features[i].attributes;
+            for (var attr in featureAttributes) {
+              resultItems.push("<b>" + attr + ":</b>  " + featureAttributes[attr] + "<br>");
+            }
+            data.push({
+                "value": featureAttributes["POP"]
+              });
+            alert(data[i].value);
+            resultItems.push("<br>");
+          }
+          data[0].color="#FDB45C";
+          data[0].highlight="#FFC870";
+          data[0].label="Yellow";
+          
+          data[1].color="#F7464A";
+          data[1].highlight="#FF5A5E";
+          data[1].label="Red";
+          
+          data[2].color="#46BFBD";
+          data[2].highlight="#5AD3D1";
+          data[2].label="Green";
+          
+          alert(JSON.stringify(data));
+          dom.byId("info").innerHTML = resultItems.join("");
+          
+          var ctx = document.getElementById("myChart").getContext("2d");
+          var Doughnut_defaults = {
+        //Boolean - Whether we should show a stroke on each segment
+        segmentShowStroke : true,
+
+        //String - The colour of each segment stroke
+        segmentStrokeColor : "#fff",
+
+        //Number - The width of each segment stroke
+        segmentStrokeWidth : 2,
+
+        //The percentage of the chart that we cut out of the middle.
+        percentageInnerCutout : 50,
+
+        //Boolean - Whether we should animate the chart
+        animation : true,
+
+        //Number - Amount of animation steps
+        animationSteps : 100,
+
+        //String - Animation easing effect
+        animationEasing : "easeOutBounce",
+
+        //Boolean - Whether we animate the rotation of the Doughnut
+        animateRotate : true,
+
+        //Boolean - Whether we animate scaling the Doughnut from the centre
+        animateScale : true,
+
+        //Function - Will fire on animation completion.
+        onAnimationComplete : null
+    };
+          var myNewChart = new Chart(ctx).Doughnut(data,Doughnut_defaults);
+          
+          
+        }
+      });
+    </script>
+    
+<!--    <script type="text/javascript">
+    var ctx = document.getElementById("myChart").getContext("2d");
+<!--    var data = [
+        {
+            value: 300,
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: "Red"
+        },
+        {
+            value: 50,
+            color: "#46BFBD",
+            highlight: "#5AD3D1",
+            label: "Green"
+        },
+        {
+            value: 100,
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Yellow"
+        }
+    ];
+    var Doughnut_defaults = {
+        //Boolean - Whether we should show a stroke on each segment
+        segmentShowStroke : true,
+
+        //String - The colour of each segment stroke
+        segmentStrokeColor : "#fff",
+
+        //Number - The width of each segment stroke
+        segmentStrokeWidth : 2,
+
+        //The percentage of the chart that we cut out of the middle.
+        percentageInnerCutout : 50,
+
+        //Boolean - Whether we should animate the chart
+        animation : true,
+
+        //Number - Amount of animation steps
+        animationSteps : 100,
+
+        //String - Animation easing effect
+        animationEasing : "easeOutBounce",
+
+        //Boolean - Whether we animate the rotation of the Doughnut
+        animateRotate : true,
+
+        //Boolean - Whether we animate scaling the Doughnut from the centre
+        animateScale : true,
+
+        //Function - Will fire on animation completion.
+        onAnimationComplete : null
+    };
+
+    var myNewChart = new Chart(ctx).Doughnut(data,Doughnut_defaults);-->
+
+</script>
+  </body>
+</html>
