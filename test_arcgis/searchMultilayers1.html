@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html dir="ltr">
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no,width=device-width" />
+   <title>ArcGIS API for JavaScript | Search widget with multiple sources</title>
+   <link rel="stylesheet" href="https://js.arcgis.com/3.15/dijit/themes/claro/claro.css">
+   <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css">
+
+   <style>
+      html,
+      body,
+   <!--   #map {
+         height: 100%;
+         width: 100%;
+         margin: 0px;
+         padding: 0px;
+      }-->
+      #search {
+         display: block;
+         position: absolute;
+         z-index: 2;
+         top: 80px;
+         left: 180px;
+      }
+   </style>
+   
+    
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Navbar Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  
+   <script src="https://js.arcgis.com/3.15/"></script>
+   <script>
+      require([
+        "esri/map", "esri/dijit/Search", "esri/layers/FeatureLayer", "esri/InfoTemplate", "dojo/domReady!"
+      ], function (Map, Search, FeatureLayer, InfoTemplate) {
+         var map = new Map("map", {
+            basemap: "gray",
+            center: [121.48, 31.22], // lon, lat
+            zoom: 5
+         });
+
+         var search = new Search({
+            enableButtonMode: true, //this enables the search widget to display as a single button
+            enableLabel: true,
+            enableInfoWindow: true,
+            showInfoWindowOnSelect: true,
+            map: map
+         }, "search");
+
+         var sources = search.get("sources");
+
+         //Push the sources used to search, by default the ArcGIS Online World geocoder is included. In addition there is a feature layer of US congressional districts. The districts search is set up to find the "DISTRICTID". Also, a feature layer of senator information is set up to find based on the senator name. 
+
+         sources.push({
+            featureLayer: new FeatureLayer("http://10.60.38.154:6080/arcgis/rest/services/SampleWorldCities/MapServer/1"),
+            searchFields: ["CONTINENT"],
+            displayField: "CONTINENT",
+            exactMatch: false,
+            outFields: ["CONTINENT", "Shape_Area"],
+            name: "CONTINENT",
+            placeholder: "ASIA",
+            maxResults: 6,
+            maxSuggestions: 6,
+
+            //Create an InfoTemplate and include three fields
+            infoTemplate: new InfoTemplate("CONTINENT", "Name: ${CONTINENT}</br>Area: ${Shape_Area}"),
+            enableSuggestions: true,
+            minCharacters: 0
+         });
+
+         sources.push({
+            featureLayer: new FeatureLayer("http://10.60.38.154:6080/arcgis/rest/services/shanghai_area/MapServer/23"),
+            searchFields: ["Name"],
+            displayField: "Name",
+            exactMatch: false,
+            name: "Region",
+            outFields: ["*"],
+            placeholder: "Shanghai region",
+            maxResults: 6,
+            maxSuggestions: 6,
+
+            //Create an InfoTemplate
+
+            infoTemplate: new InfoTemplate("Region", "Name: ${Name}</br>Code: ${Code}"),
+            
+            enableSuggestions: true,
+            minCharacters: 0
+         });
+
+         //Set the sources above to the search widget
+         search.set("sources", sources);
+
+         search.startup();
+
+      });
+   </script>
+</head>
+
+<body>
+   
+   <div class="container">
+
+      <!-- Static navbar -->
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">ArcGIS Map</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#">首页</a></li>
+              <li><a href="#">关于</a></li>
+              <li><a href="#">Contact</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">统计 <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">饼图</a></li>
+                  <li><a href="#">柱状图</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li class="dropdown-header">Nav header</li>
+                  <li><a href="#">Separated link</a></li>
+                  <li><a href="#">One more separated link</a></li>
+                </ul>
+              </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li class="active"><a href="./">Default <span class="sr-only">(current)</span></a></li>
+              <li><a href="../navbar-static-top/">注册</a></li>
+              <li><a href="../navbar-fixed-top/">登录</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </nav>
+      
+    </div> <!-- /container -->
+    
+    <div class="jumbotron"> 
+    	<div class="container">        
+   	    	<div id="map">
+   	     	 <div id="search"></div>
+   	    	</div>  
+   	    </div> 	    
+   	</div>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+
+</html>
