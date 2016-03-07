@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Color Ramp</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.16/esri/css/esri.css">
+    <style>
+      html, body, #map {
+        height: 100%;
+        margin: 0;
+      }
+      #info {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        padding: 10px;
+        background-color: #ddd;
+        font: 14px Segoe UI;
+        width: 200px;
+        text-align: center;
+        border-radius: 0 10px 0 0;
+      }
+    </style>
+    <script src="https://js.arcgis.com/3.16/"></script>
+    <script>
+      require([
+        "esri/map", "esri/geometry/Extent", 
+        "esri/layers/FeatureLayer", "esri/InfoTemplate", "esri/dijit/Legend",
+        "esri/renderers/SimpleRenderer", "esri/Color", 
+        "esri/symbols/SimpleFillSymbol", "esri/symbols/SimpleLineSymbol", 
+        "dojo/domReady!"
+      ], function(
+        Map, Extent, 
+        FeatureLayer, InfoTemplate, Legend,
+        SimpleRenderer, Color, 
+        SimpleFillSymbol, SimpleLineSymbol
+      ) {
+        var map = new Map("map", {
+          extent: new Extent({"xmin":73.441277,"ymin":18.159829,"xmax":135.08693,"ymax":53.561771,"spatialReference":{"wkid":102}})
+        });
+        
+        var layer = new FeatureLayer("http://10.60.38.154:6080/arcgis/rest/services/CapHouPri/MapServer/0", {
+          outFields: ["*"],
+          infoTemplate: new InfoTemplate("${NAME}", "<div style='font: 18px Segoe UI'>The housing price of the area of the county is <b>${capHouPri}</b> per squaremeter.</div>")
+        });
+        
+        var legend = new Legend({
+          map: map,
+          layerInfos: [{ title: "housing price", layer: layer }]
+        }, "legend");
+        
+        layer.on("load", function(){
+          var renderer = new SimpleRenderer(new SimpleFillSymbol().setOutline(new SimpleLineSymbol().setWidth(0.1).setColor(new Color([128,128,128]))));
+          renderer.setColorInfo({
+            field: "capHouPri",
+            minDataValue: 0,
+            maxDataValue: 10000,
+            colors: [
+              new Color([255, 255, 255]),
+              new Color([127, 127, 0])
+            ]
+          });
+          layer.setRenderer(renderer);
+          map.addLayer(layer);
+          legend.startup();
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="info"><div id="legend"></div></div>
+  </body>
+</html> 
