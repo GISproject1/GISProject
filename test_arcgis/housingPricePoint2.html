@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Map and Layer</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.16/esri/css/esri.css">
+    <style>
+      html, body, #map {
+        height: 100%;
+        margin: 0;
+      }
+      #info {
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 10px;
+        background-color: #cec;
+        font: 14px Segoe UI;
+        width: 200px;
+        text-align: center;
+        border-radius: 0 0 0 10px;
+      }
+    </style>
+    <script src="https://js.arcgis.com/3.16/"></script>
+    <script>
+    var map;
+      require([
+        "esri/map", "esri/geometry/Extent", "esri/layers/FeatureLayer", "esri/InfoTemplate", "esri/symbols/SimpleFillSymbol",
+        "esri/renderers/SimpleRenderer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/ScaleDependentRenderer",
+        "esri/Color", "dojo/domReady!"
+      ], function(Map, Extent, FeatureLayer, InfoTemplate, SimpleFillSymbol, SimpleRenderer, SimpleMarkerSymbol, ScaleDependentRenderer, Color) {
+        map = new Map("map", {
+        	extent: new Extent({"xmin":73.441277,"ymin":18.159829,"xmax":135.08693,"ymax":53.561771,"spatialReference":{"wkid":102}})
+          
+        });
+        
+        
+        var statesUrl = "http://10.60.38.154:6080/arcgis/rest/services/CapHouPri/MapServer/0";
+        var refLayer2 = new FeatureLayer(statesUrl);
+        refLayer2.on("load", function() {
+          refLayer2.renderer.symbol.outline.setWidth(3);
+          refLayer2.renderer.symbol.outline.setColor(new Color("#787878"));
+          refLayer2.renderer.symbol.setColor(new Color("#FFFFFF"));
+        });
+        map.addLayer(refLayer2);
+        
+        
+        var refLayer = new FeatureLayer(statesUrl);
+        refLayer.on("load", function(){
+          refLayer.renderer.symbol.outline.setWidth(0.5);
+          refLayer.renderer.symbol.outline.setColor(new Color("#B5ACAE"));
+          refLayer.renderer.symbol.setColor(new Color("#FFFFFF"));
+        });
+        map.addLayer(refLayer);
+        
+        
+        var layer = new FeatureLayer("http://10.60.38.154:6080/arcgis/rest/services/CapHouPri/MapServer/0", {
+          outFields: ["NAME", "capHouPri"],
+          infoTemplate: new InfoTemplate("${NAME}, ${capHouPri}")
+        });
+        layer.setDefinitionExpression("capHouPri>0.01");
+        
+        
+        var markerSym = new SimpleMarkerSymbol();
+        markerSym.setColor(new Color("#78B378"));
+        markerSym.setOutline(markerSym.outline.setColor(new Color([133,197,133,0.75])));
+        var renderer1 = new SimpleRenderer(markerSym);   
+        var sizeInfo = {
+          field:"capHouPri",
+          minSize:1,
+          maxSize:15,
+          minDataValue:0,
+          maxDataValue:20000
+        };
+        renderer1.setSizeInfo(sizeInfo);
+
+        //for the second renderer increase the dot sizes and set a backgroundFillSymbol
+        var renderer2 = new SimpleRenderer(markerSym);
+        var sizeInfo2 = {
+          field:"capHouPri",
+          minSize:5,
+          maxSize:20,
+          minDataValue:0,
+          maxDataValue:20000
+        };        
+        renderer2.setSizeInfo(sizeInfo2);
+       
+        
+        var params = {rendererInfos: [{
+          "renderer": renderer1,
+          "minScale": 50000000,
+          "maxScale": 10000000
+        }, {
+          "renderer": renderer2,
+          "minScale": 10000000,
+          "maxScale": 5000000
+        }]};
+
+        var scaleDependentRenderer = new ScaleDependentRenderer(params);
+        layer.setRenderer(scaleDependentRenderer);
+        map.addLayer(layer);
+        
+        
+        
+      });
+    </script>
+  </head>
+  <body>
+   <div id="map"></div>
+    <div id="info"><div style="font-size: 36px;">Housing Price</div></div>
+  </body>
+</html> 
